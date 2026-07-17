@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaxMate India</title>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --c1: #355C7D;
+  --c2: #725A7A;
+  --c3: #C55C86;
+  --c4: #FF7582;
+  --bg: #090d16;
+  --surface: #111827;
+  --surface-up: #182034;
+  --surface-up2: #1e2a42;
+  --recess: #0a0f1c;
+  --text: #e4dce8;
+  --text-sec: #9b8fa8;
+  --text-dim: #5a5068;
+  --border: #1e2a3e;
+  --border-hi: #2a3a56;
+  --good: #5a9e8f;
+  --warn: #e8b84a;
+  --danger: #FF7582;
+  --btn-face: linear-gradient(180deg, #d8709a 0%, #C55C86 35%, #a84872 70%, #963f66 100%);
+  --btn-bottom: #7a3255;
+  --btn-press: linear-gradient(180deg, #b84e78 0%, #a84872 50%, #963f66 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Public Sans','Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100dvh;overflow:hidden;position:relative;
+}
+h1,h2,h3,h4,h5,.display{font-family:'Ynsect Moksha',Georgia,'Times New Roman',serif;}
+
+/* Skeuomorphic lighting */
+body::before{
+  content:'';position:fixed;top:-25%;left:-15%;width:70%;height:65%;
+  background:radial-gradient(ellipse,rgba(53,92,125,0.10) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;bottom:-20%;right:-10%;width:55%;height:55%;
+  background:radial-gradient(ellipse,rgba(114,90,122,0.07) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+#app{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;max-width:800px;margin:0 auto;}
+
+/* ═══ HEADER — raised metal bar ═══ */
+.app-header{
+  padding:12px 20px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:linear-gradient(180deg,#1a2236 0%,#141c2e 50%,#111827 100%);
+  box-shadow:0 2px 0 rgba(255,255,255,0.03),0 4px 16px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+  flex-shrink:0;position:relative;z-index:10;
+}
+.logo-text{
+  font-family:'Ynsect Moksha',Georgia,serif;font-weight:400;font-size:1.3rem;
+  background:linear-gradient(135deg,var(--c4),var(--c3),#e8a0b8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-tagline{font-size:0.7rem;color:var(--text-dim);margin-top:1px;letter-spacing:0.5px;}
+.restart-btn{
+  background:linear-gradient(180deg,#1e2a42 0%,#182034 100%);
+  border:1px solid var(--border);color:var(--text-sec);font-size:0.78rem;
+  padding:7px 14px;border-radius:6px;cursor:pointer;
+  font-family:'Public Sans',sans-serif;transition:all 0.15s;
+  box-shadow:0 1px 0 rgba(255,255,255,0.04),0 2px 6px rgba(0,0,0,0.4);
+}
+.restart-btn:hover{border-color:var(--c3);color:var(--c3);}
+.restart-btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);transform:translateY(1px);}
+
+/* ═══ CHAT AREA ═══ */
+.chat-area{flex:1;overflow-y:auto;padding:20px 16px;scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.chat-area::-webkit-scrollbar{width:5px;}
+.chat-area::-webkit-scrollbar-track{background:transparent;}
+.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+/* ═══ MESSAGES ═══ */
+.msg{display:flex;gap:10px;margin-bottom:16px;animation:msgIn 0.35s ease-out;}
+.msg-bot{align-items:flex-start;}
+.msg-user{justify-content:flex-end;}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.msg-avatar{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--c1),#2a4a66);
+  box-shadow:0 2px 6px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;color:var(--c4);font-weight:700;
+  font-family:'Ynsect Moksha',Georgia,serif;margin-top:2px;
+}
+.msg-bubble{max-width:85%;padding:13px 16px;line-height:1.65;font-size:0.9rem;}
+
+/* Bot bubble — recessed dark material */
+.msg-bot .msg-bubble{
+  background:linear-gradient(180deg,#151e30 0%,#121a2a 100%);
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;border-top-left-radius:4px;color:var(--text);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.3),inset 0 0 0 1px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.3);
+}
+/* User bubble — raised rose material */
+.msg-user .msg-bubble{
+  background:linear-gradient(180deg,#c8688e 0%,#b8557c 40%,#a0486c 100%);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;border-top-right-radius:4px;color:#f5e8ee;
+  box-shadow:0 3px 0 #7a3255,0 5px 12px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.msg-bubble strong{color:var(--c4);}
+
+/* ═══ TYPING INDICATOR ═══ */
+.typing-indicator{display:flex;gap:10px;margin-bottom:16px;animation:msgIn 0.3s ease-out;}
+.typing-dots{
+  background:linear-gradient(180deg,#151e30,#121a2a);
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;border-top-left-radius:4px;
+  padding:14px 20px;display:flex;gap:5px;align-items:center;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.3),0 2px 8px rgba(0,0,0,0.3);
+}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--c3);animation:bounce 1.4s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:0.16s;}
+.typing-dots span:nth-child(3){animation-delay:0.32s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-8px);}}
+
+/* ═══ FORM CARDS — recessed tray ═══ */
+.form-card{
+  background:linear-gradient(180deg,#0e1524 0%,#0c1220 100%);
+  border:1px solid rgba(255,255,255,0.03);
+  border-radius:14px;padding:20px;margin:8px 0 16px 44px;max-width:90%;
+  animation:msgIn 0.35s ease-out;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 1px 0 rgba(255,255,255,0.02);
+}
+.form-card h4{font-size:0.92rem;font-weight:400;color:var(--c4);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.form-row{margin-bottom:12px;}
+.form-row label{display:block;font-size:0.8rem;color:var(--text-sec);margin-bottom:5px;font-weight:500;}
+.form-row input,.form-row select{
+  width:100%;background:linear-gradient(180deg,#080c18,#0a0f1c);
+  border:1px solid rgba(255,255,255,0.04);border-radius:8px;
+  padding:10px 14px;color:var(--text);font-size:0.88rem;
+  font-family:'Public Sans',sans-serif;transition:all 0.2s;outline:none;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6),inset 0 0 0 1px rgba(0,0,0,0.2);
+}
+.form-row input:focus,.form-row select:focus{
+  border-color:var(--c3);box-shadow:inset 0 2px 6px rgba(0,0,0,0.4),0 0 0 3px rgba(197,92,134,0.15);
+}
+.form-row input::placeholder{color:var(--text-dim);}
+.form-row .hint{font-size:0.72rem;color:var(--text-dim);margin-top:3px;}
+.form-row select{cursor:pointer;appearance:auto;}
+
+/* Skeuomorphic raised button */
+.form-submit{
+  width:100%;padding:12px;border:none;border-radius:8px;
+  background:var(--btn-face);color:white;font-size:0.9rem;font-weight:600;
+  cursor:pointer;font-family:'Ynsect Moksha',Georgia,serif;transition:all 0.1s;margin-top:6px;
+  box-shadow:0 3px 0 var(--btn-bottom),0 5px 12px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
+  letter-spacing:0.3px;
+}
+.form-submit:hover{filter:brightness(1.05);}
+.form-submit:active{
+  background:var(--btn-press);transform:translateY(3px);
+  box-shadow:0 0 0 var(--btn-bottom),0 1px 3px rgba(0,0,0,0.4),inset 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ═══ REGIME SELECTOR — physical cards ═══ */
+.regime-selector{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+  margin:8px 0 16px 44px;max-width:95%;animation:msgIn 0.35s ease-out;
+}
+.regime-card{
+  background:linear-gradient(180deg,#141d2e 0%,#111827 100%);
+  border:1px solid rgba(255,255,255,0.05);border-radius:10px;
+  padding:16px 12px;cursor:pointer;transition:all 0.2s;text-align:center;
+  box-shadow:0 3px 0 #0a0f1c,0 5px 14px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.regime-card:hover{
+  border-color:var(--c3);transform:translateY(-2px);
+  box-shadow:0 5px 0 #0a0f1c,0 8px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.08),0 0 20px rgba(197,92,134,0.1);
+}
+.regime-card:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0f1c,0 2px 6px rgba(0,0,0,0.4);}
+.regime-card h4{font-family:'Ynsect Moksha',Georgia,serif;font-size:0.88rem;margin-bottom:5px;}
+.regime-card p{font-size:0.72rem;color:var(--text-dim);line-height:1.4;}
+.rc-old h4{color:var(--warn);}
+.rc-new h4{color:var(--good);}
+.rc-both h4{color:var(--c4);}
+
+/* ═══ INPUT AREA — recessed well ═══ */
+.input-area{
+  padding:12px 16px;border-top:1px solid rgba(255,255,255,0.03);
+  background:linear-gradient(180deg,#0e1420 0%,#0b1018 100%);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.4);
+  flex-shrink:0;display:flex;gap:10px;align-items:center;
+}
+.input-area input{
+  flex:1;background:linear-gradient(180deg,#080c16,#0a0f1c);
+  border:1px solid rgba(255,255,255,0.04);border-radius:8px;
+  padding:11px 16px;color:var(--text);font-size:0.9rem;
+  font-family:'Public Sans',sans-serif;outline:none;transition:all 0.2s;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.15);
+}
+.input-area input:focus{border-color:var(--c3);box-shadow:inset 0 2px 6px rgba(0,0,0,0.3),0 0 0 3px rgba(197,92,134,0.12);}
+.input-area input::placeholder{color:var(--text-dim);}
+.send-btn{
+  width:44px;height:44px;border-radius:8px;border:none;
+  background:var(--btn-face);color:white;font-size:0.95rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 3px 0 var(--btn-bottom),0 4px 10px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
+  transition:all 0.1s;
+}
+.send-btn:hover{filter:brightness(1.05);}
+.send-btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--btn-bottom),0 1px 3px rgba(0,0,0,0.3);}
+.send-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none!important;filter:none!important;}
+
+/* ═══ REPORT CARD — elevated document ═══ */
+.report-card{
+  margin:8px 0 16px 0;animation:msgIn 0.5s ease-out;
+  background:linear-gradient(180deg,#131c2e 0%,#101828 100%);
+  border:1px solid rgba(255,255,255,0.05);border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 0 #080c16,0 12px 40px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.report-header{
+  background:linear-gradient(180deg,#1e2d48 0%,#1a2740 40%,#162238 100%);
+  padding:22px 24px;text-align:center;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.report-header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
+}
+.report-header h2{font-family:'Ynsect Moksha',Georgia,serif;font-size:1.1rem;color:#e8dce8;font-weight:400;}
+.report-header p{font-size:0.78rem;color:var(--text-dim);margin-top:4px;}
+.report-body{padding:20px 22px;}
+.report-section{margin-bottom:22px;}
+.report-section:last-child{margin-bottom:0;}
+.report-section-title{
+  font-family:'Ynsect Moksha',Georgia,serif;font-size:0.92rem;font-weight:400;
+  color:var(--text);margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:8px;
+}
+.report-line{font-size:0.85rem;color:var(--text-sec);line-height:1.7;margin-bottom:3px;}
+.report-line strong{color:var(--text);}
+.report-big-num{
+  font-family:'Ynsect Moksha',Georgia,serif;font-size:1.5rem;color:var(--c4);margin:10px 0;display:block;
+}
+.report-save-num{
+  font-family:'Ynsect Moksha',Georgia,serif;font-size:1.35rem;color:var(--c4);
+  background:linear-gradient(180deg,rgba(197,92,134,0.08),rgba(197,92,134,0.03));
+  border:1px solid rgba(197,92,134,0.15);border-radius:10px;
+  padding:14px 18px;margin:10px 0;display:block;text-align:center;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Miss / Ok / Info panels — recessed */
+.report-miss{
+  background:linear-gradient(180deg,rgba(255,117,130,0.06),rgba(255,117,130,0.02));
+  border-left:3px solid var(--danger);border-radius:0 8px 8px 0;
+  padding:10px 14px;margin:8px 0;font-size:0.83rem;color:var(--text-sec);line-height:1.6;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,0.15);
+}
+.report-miss strong{color:var(--danger);}
+.report-ok{
+  background:linear-gradient(180deg,rgba(90,158,143,0.06),rgba(90,158,143,0.02));
+  border-left:3px solid var(--good);border-radius:0 8px 8px 0;
+  padding:10px 14px;margin:8px 0;font-size:0.83rem;color:var(--text-sec);line-height:1.6;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,0.15);
+}
+.report-ok strong{color:var(--good);}
+.report-warn{
+  background:linear-gradient(180deg,rgba(232,184,74,0.06),rgba(232,184,74,0.02));
+  border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+  padding:10px 14px;margin:8px 0;font-size:0.83rem;color:var(--text-sec);line-height:1.6;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,0.15);
+}
+.report-warn strong{color:var(--warn);}
+.report-disclaimer{
+  background:linear-gradient(180deg,rgba(232,184,74,0.05),rgba(232,184,74,0.02));
+  border:1px solid rgba(232,184,74,0.12);border-radius:8px;
+  padding:10px 14px;margin:12px 0;font-size:0.78rem;color:var(--warn);line-height:1.5;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Action items */
+.report-action{
+  display:flex;gap:10px;align-items:flex-start;margin:8px 0;
+  background:linear-gradient(180deg,#151e30,#121a28);
+  border:1px solid rgba(255,255,255,0.03);border-radius:8px;
+  padding:12px 14px;box-shadow:0 2px 0 #0a0f1c,0 3px 8px rgba(0,0,0,0.3);
+}
+.report-action-num{
+  width:26px;height:26px;border-radius:6px;flex-shrink:0;
+  background:linear-gradient(180deg,var(--c3),#a0486c);color:white;font-size:0.75rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 0 #7a3255,inset 0 1px 0 rgba(255,255,255,0.15);margin-top:1px;
+}
+.report-action-text{font-size:0.84rem;color:var(--text-sec);line-height:1.5;}
+.report-action-text strong{color:var(--text);}
+
+/* Skeuomorphic progress bar */
+.skeu-bar{
+  height:20px;background:#080c16;border-radius:4px;margin:8px 0;overflow:hidden;position:relative;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6),inset 0 0 0 1px rgba(0,0,0,0.3);
+}
+.skeu-bar-fill{
+  height:100%;border-radius:3px;transition:width 0.8s ease;
+  background:linear-gradient(180deg,var(--c4) 0%,var(--c3) 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.skeu-bar-label{font-size:0.75rem;color:var(--text-dim);margin-top:2px;}
+
+/* Skeuomorphic table */
+.skeu-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  background:#080c16;border-radius:8px;overflow:hidden;margin:10px 0;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.2);
+}
+.skeu-table th{
+  background:linear-gradient(180deg,#1a2540,#162035);padding:10px 14px;
+  text-align:left;font-size:0.78rem;color:var(--text-dim);
+  border-bottom:1px solid rgba(255,255,255,0.04);font-weight:500;
+}
+.skeu-table td{
+  padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.02);
+  color:var(--text-sec);font-size:0.82rem;
+}
+.skeu-table tr:last-child td{border-bottom:none;}
+.skeu-table .hl td{color:var(--c4);font-weight:600;background:rgba(197,92,134,0.04);}
+
+/* Spending tree */
+.spend-tree{
+  background:#080c16;border-radius:8px;padding:12px 16px;margin:8px 0;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.2);
+  font-size:0.83rem;color:var(--text-sec);line-height:1.8;
+}
+.spend-tree .st-total{color:var(--c4);font-weight:600;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;margin-top:4px;}
+
+/* Copy button */
+.report-copy-btn{
+  display:block;width:100%;padding:10px;
+  border:1px solid rgba(255,255,255,0.04);border-radius:8px;
+  background:linear-gradient(180deg,#141d2e,#111827);color:var(--text-sec);
+  font-size:0.83rem;cursor:pointer;transition:all 0.15s;
+  font-family:'Public Sans',sans-serif;margin-top:16px;
+  box-shadow:0 2px 0 #080c16,0 3px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.report-copy-btn:hover{border-color:var(--c3);color:var(--c3);}
+.report-copy-btn:active{transform:translateY(2px);box-shadow:0 0 0 #080c16,0 1px 3px rgba(0,0,0,0.3);}
+
+/* Responsive */
+@media(max-width:640px){
+  .form-card,.regime-selector{margin-left:0;max-width:100%;}
+  .regime-selector{grid-template-columns:1fr;gap:8px;}
+  .msg-bubble{max-width:92%;}
+  .report-body{padding:16px;}
+  .report-big-num{font-size:1.25rem;}
+  .report-save-num{font-size:1.15rem;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="app-header">
+    <div>
+      <div class="logo-text"><i class="fa-solid fa-indian-rupee-sign" style="margin-right:4px;font-size:0.95rem;"></i> TaxMate India</div>
+      <div class="logo-tagline">Personal Tax + Finance Advisor</div>
+    </div>
+    <button class="restart-btn" onclick="restartApp()" aria-label="Start new session"><i class="fa-solid fa-rotate-right" style="margin-right:4px;"></i>New Session</button>
+  </header>
+  <main class="chat-area" id="chatArea" role="log" aria-live="polite"></main>
+  <footer class="input-area" id="inputArea">
+    <input type="text" id="userInput" placeholder="Type your response..." autocomplete="off" aria-label="Type your response">
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════ TAX SLABS — FY 2024-25 ═══════════════ */
+const OLD_SLABS=[{limit:250000,rate:0},{limit:500000,rate:.05},{limit:1000000,rate:.20},{limit:Infinity,rate:.30}];
+const NEW_SLABS=[{limit:300000,rate:0},{limit:700000,rate:.05},{limit:1000000,rate:.10},{limit:1200000,rate:.15},{limit:1500000,rate:.20},{limit:Infinity,rate:.30}];
+const STD_OLD=50000,STD_NEW=75000,LIM_80C=150000,LIM_80D_SELF=25000,LIM_80D_PAR=25000,LIM_80D_PAR_S=50000,LIM_24B=200000,LIM_NPS=50000;
+const METROS=['mumbai','delhi','bangalore','bengaluru','chennai','kolkata','hyderabad'];
+
+/* ═══════════════ UTILITIES ═══════════════ */
+function fmt(n){if(!n)return'₹0';const neg=n<0;n=Math.abs(Math.round(n));let s=n.toString(),l=s.substring(s.length-3),r=s.substring(0,s.length-3);if(r)l=','+l;return(neg?'-':'')+'₹'+r.replace(/\B(?=(\d{2})+(?!\d))/g,',')+l;}
+function parse(s){if(!s)return 0;s=s.toString().toLowerCase().replace(/[₹,\s]/g,'').trim();if(!s||'na nhi no none 0'.includes(s))return 0;if(/crore|cr/.test(s))return(parseFloat(s.replace(/crore|cr/g,''))||0)*1e7;if(/lakh|lac/.test(s))return(parseFloat(s.replace(/lakh|lac/g,''))||0)*1e5;if(/\d+l$/.test(s))return(parseFloat(s)*1e5)||0;if(/k/.test(s))return(parseFloat(s.replace('k',''))||0)*1e3;return parseFloat(s)||0;}
+function isY(s){return['ha','han','yes','ji','1','sahi','haan','yup','yeah'].some(w=>s.toLowerCase().trim().includes(w));}
+function isN(s){return['na','no','nhi','nahi','0','none','nope'].some(w=>{const t=s.toLowerCase().trim();return t===w||t.includes(w);});}
+
+function taxFromSlabs(ti,slabs){ti=Math.max(0,ti);let t=0,p=0;for(const s of slabs){if(ti>p){t+=Math.min(ti,s.limit-p)*s.rate;}p=s.limit;if(ti<=s.limit)break;}return t;}
+
+function calcOld(gross,d){d=d||{};let ti=gross-(d.sd||STD_OLD)-(d.hra||0)-Math.min(d.c80||0,LIM_80C)-(d.d80||0)-Math.min(d.s24||0,LIM_24B)-Math.min(d.nps||0,LIM_NPS);ti=Math.max(0,ti);let t=taxFromSlabs(ti,OLD_SLABS);if(ti<=500000)t=0;const c=t*.04;return{ti,t:t+c,c,bt:t};}
+
+function calcNew(gross,d){d=d||{};let ti=gross-(d.sd||STD_NEW);ti=Math.max(0,ti);let t=taxFromSlabs(ti,NEW_SLABS);if(ti<=700000)t=0;const c=t*.04;return{ti,t:t+c,c,bt:t};}
+
+function calcHRA(basic,hra,rent,metro){if(hra<=0||rent<=0)return 0;const p=metro?.50:.40;return Math.max(0,Math.min(hra,basic*p,Math.max(0,rent-basic*.1)));}
+
+function incomeClass(annual){if(annual<3e5)return'vl';if(annual<5e5)return'lo';if(annual<7e5)return'lm';if(annual<10e5)return'mid';if(annual<15e5)return'um';return'hi';}
+function savingsEmoji(r){return r<10?'🔴':r<20?'🟡':r<35?'🟢':'🌟';}
+function sipFuture(mo,yr,rate){const r=rate/12/100,n=yr*12;if(!r)return mo*n;return Math.round(mo*((Math.pow(1+r,n)-1)/r)*(1+r));}
+
+/* ═══════════════ APP STATE ═══════════════ */
+let D={},CS='INIT';
+function resetS(){D={ut:null,ih:0,ctc:0,hra:0,metro:false,rent:0,parents:false,epf:0,lic:0,o80c:0,hlP:0,hlI:0,hiSelf:0,hiPar:0,parSr:false,exp:{rent:0,food:0,trans:0,mob:0,emi:0,misc:0},regime:null,bizRev:0,bizType:'',bizGST:false,bizSlab:0,bizExp:0,bizBooks:false,bizEmp:0,bizPE:{rent:0,food:0,trans:0,emi:0,misc:0},bizInv:0,bizHI:0,bizLoan:0};CS='INIT';}
+
+/* ═══════════════ CHAT UI ═══════════════ */
+const CA=document.getElementById('chatArea'),UI=document.getElementById('userInput'),SB=document.getElementById('sendBtn'),IA=document.getElementById('inputArea');
+function scroll(){setTimeout(()=>CA.scrollTop=CA.scrollHeight,50);}
+
+async function botMsg(html,delay=700){return new Promise(r=>{const t=document.createElement('div');t.className='typing-indicator';t.innerHTML=`<div class="msg-avatar">₹</div><div class="typing-dots"><span></span><span></span><span></span></div>`;CA.appendChild(t);scroll();setTimeout(()=>{t.remove();const m=document.createElement('div');m.className='msg msg-bot';m.innerHTML=`<div class="msg-avatar">₹</div><div class="msg-bubble">${html.replace(/\n/g,'<br>')}</div>`;CA.appendChild(m);scroll();r();},delay);});}
+
+function userMsg(t){const m=document.createElement('div');m.className='msg msg-user';m.innerHTML=`<div class="msg-bubble">${t.replace(/\n/g,'<br>')}</div>`;CA.appendChild(m);scroll();}
+
+function showForm(title,icon,fields,btnText,onSubmit){
+  const c=document.createElement('div');c.className='form-card';
+  c.innerHTML=`<h4><i class="fa-solid ${icon}"></i> ${title}</h4>${fields}<button class="form-submit">${btnText}</button>`;
+  CA.appendChild(c);scroll();IA.style.display='none';
+  c.querySelector('.form-submit').addEventListener('click',()=>{
+    const inps=c.querySelectorAll('input,select');let ok=true;
+    inps.forEach(i=>{if(i.dataset.req==='true'&&!i.value.trim()){i.style.borderColor='var(--danger)';ok=false;}else i.style.borderColor='';});
+    if(!ok)return;const v={};inps.forEach(i=>v[i.name]=i.value);IA.style.display='flex';UI.focus();onSubmit(v,c);
+  });
+  const inps=c.querySelectorAll('input');if(inps.length){inps[inps.length-1].addEventListener('keydown',e=>{if(e.key==='Enter')c.querySelector('.form-submit').click();});setTimeout(()=>inps[0].focus(),400);}
+}
+
+function showRegime(cb){
+  const d=document.createElement('div');d.className='regime-selector';
+  d.innerHTML=`<div class="regime-card rc-old"><h4>Old Regime</h4><p>Zyada deductions — HRA, 80C, 80D sab claim</p></div><div class="regime-card rc-new"><h4>New Regime</h4><p>Kam deductions par lower slabs, ₹7L tak zero tax</p></div><div class="regime-card rc-both"><h4>Dono Calculate</h4><p>Main batata hoon konsa better hai</p></div>`;
+  CA.appendChild(d);scroll();IA.style.display='none';
+  d.querySelectorAll('.regime-card').forEach((card,i)=>{
+    card.addEventListener('click',()=>{IA.style.display='flex';cb(['old','new','both'][i]);d.remove();});
+  });
+}
+
+function setEn(on){UI.disabled=!on;SB.disabled=!on;}
+
+/* ═══════════════ INPUT HANDLER ═══════════════ */
+function sendMessage(){const v=UI.value.trim();if(!v)return;UI.value='';handleIn(v);}
+UI.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
+
+async function handleIn(raw){setEn(false);const i=raw.trim();
+  switch(CS){
+    case'AWAIT_UT':await handleUT(i);break;
+    case'SAL_B2':await handleSalB(i);break;
+    default:break;
+  }
+  setEn(true);UI.focus();
+}
+
+/* ═══════════════ START ═══════════════ */
+async function startApp(){
+  resetS();CA.innerHTML='';
+  await botMsg(`Namaste! 👋 Main hoon TaxMate India — aapka personal tax + finance advisor.\n\nMain aapko bataunga:\n✅ Kitna tax bachaa sakte ho legally\n✅ Spending kahan waste ho rahi hai\n✅ Paise kahan invest karo smartly\n\nPehle batao — aap kya karte ho?\n\n1️⃣ Salaried Employee (private ya government job)\n2️⃣ Business Owner / Self-Employed / Freelancer\n\nSirf 1 ya 2 type karo.`,500);
+  CS='AWAIT_UT';setEn(true);UI.focus();
+}
+
+async function handleUT(i){
+  const l=i.toLowerCase();
+  if(l.includes('1')||l.includes('salaried')||l.includes('job')||l.includes('employee')||l.includes('service')){
+    D.ut='salaried';userMsg('Salaried Employee');await salA();
+  }else if(l.includes('2')||l.includes('business')||l.includes('freelance')||l.includes('self')||l.includes('owner')){
+    D.ut='business';userMsg('Business Owner / Freelancer');await bizA();
+  }else{await botMsg('Sirf 1 ya 2 type karo, ya "salaried" ya "business" likh sakte ho.',400);}
+}
+
+/* ═══════════════ SALARIED FLOW ═══════════════ */
+async function salA(){
+  await botMsg(`Theek hai! Kuch basic details do:`,500);
+  CS='SAL_FORM_A';
+  showForm('Basic Income','fa-money-bill-wave',`
+    <div class="form-row"><label>Monthly in-hand salary kitni hai? (jo account mein actually aata hai)</label><input type="text" name="ih" placeholder="e.g. 50000 ya 50k" data-required="true"><div class="hint">Jo amount har month bank mein credit hoti hai</div></div>
+    <div class="form-row"><label>CTC (Cost to Company) kitna hai? (salary slip se ya offer letter se)</label><input type="text" name="ctc" placeholder="e.g. 65000 ya 0 agar pata nahi"></div>
+    <div class="form-row"><label>HRA milta hai kya salary mein alag se? Kitna per month?</label><input type="text" name="hra" placeholder="e.g. 15000 ya 0"><div class="hint">Agar HRA component nahi hai toh 0 likho</div></div>
+    <div class="form-row"><label>City type?</label><select name="city"><option value="metro">Metro (Mumbai, Delhi, Bangalore, Chennai, Kolkata, Hyderabad)</option><option value="nonmetro">Non-Metro</option></select></div>
+  `,'Next — Living Situation',async(v,c)=>{
+    c.remove();D.ih=parse(v.ih);D.ctc=parse(v.ctc);D.hra=parse(v.hra);D.metro=v.city==='metro';
+    userMsg(`In-hand: ${fmt(D.ih)}/month${D.ctc?', CTC: '+fmt(D.ctc)+'/month':''}${D.hra?', HRA: '+fmt(D.hra)+'/month':''}, ${D.metro?'Metro':'Non-Metro'}`);
+    await salB();
+  });
+}
+
+async function salB(){
+  await botMsg(`Acha! Ab ghar ke baare mein batao:\n\nKya aap rent pe rehte ho? Kitna rent dete ho per month?\nKya parents ke saath rehte ho? (Tax calculation ke liye important hai)`,500);
+  CS='SAL_B2';setEn(true);
+}
+
+async function handleSalB(i){
+  const rm=i.match(/[\d,.]+[lk]*lakh*lac*crore*cr*k*/gi);let rv=0;
+  if(rm)rv=parse(rm[rm.length-1]);if(!rv)rv=parse(i);
+  const l=i.toLowerCase();const wp=l.includes('parent')||l.includes('maa')||l.includes('papa')||l.includes('baap')||(l.includes('saath')&&l.includes('ghar'));
+  D.rent=Math.max(0,rv);D.parents=wp;
+  userMsg(`${D.rent>0?'Rent: '+fmt(D.rent)+'/month':'No rent'}${wp?', Lives with parents':', Lives separately'}`);
+  await salC();
+}
+
+async function salC(){
+  await botMsg(`Ab batao kya already invest kar rahe ho:`,500);
+  showForm('Existing Investments','fa-piggy-bank',`
+    <div class="form-row"><label>PF/EPF kitna cut hota hai salary se per month?</label><input type="text" name="epf" placeholder="e.g. 2400 ya 0"><div class="hint">Salary slip mein "PF" ya "EPF" dikhta hai</div></div>
+    <div class="form-row"><label>Koi LIC policy hai? Yearly premium kitna?</label><input type="text" name="lic" placeholder="e.g. 15000 ya 0"></div>
+    <div class="form-row"><label>Koi aur investment? PPF, ELSS, FD, NSC — kitna per year total?</label><input type="text" name="o80c" placeholder="e.g. 50000 ya 0"></div>
+    <div class="form-row"><label>Home loan hai? Principal paid this year?</label><input type="text" name="hlP" placeholder="e.g. 120000 ya 0"></div>
+    <div class="form-row"><label>Home loan — Interest paid this year?</label><input type="text" name="hlI" placeholder="e.g. 180000 ya 0"></div>
+    <div class="form-row"><label>Health insurance — Self/Spouse yearly premium?</label><input type="text" name="hiSelf" placeholder="e.g. 12000 ya 0"></div>
+    <div class="form-row"><label>Health insurance — Parents yearly premium?</label><input type="text" name="hiPar" placeholder="e.g. 20000 ya 0"></div>
+    <div class="form-row"><label>Parents senior citizen (60+)?</label><select name="parSr"><option value="no">No</option><option value="yes">Yes (60+)</option></select></div>
+  `,'Next — Monthly Expenses',async(v,c)=>{
+    c.remove();D.epf=parse(v.epf);D.lic=parse(v.lic);D.o80c=parse(v.o80c);D.hlP=parse(v.hlP);D.hlI=parse(v.hlI);D.hiSelf=parse(v.hiSelf);D.hiPar=parse(v.hiPar);D.parSr=v.parSr==='yes';
+    let p=[];if(D.epf)p.push(`EPF: ${fmt(D.epf)}/mo`);if(D.lic)p.push(`LIC: ${fmt(D.lic)}/yr`);if(D.o80c)p.push(`80C: ${fmt(D.o80c)}/yr`);if(D.hlI)p.push(`HL Interest: ${fmt(D.hlI)}/yr`);if(D.hiSelf)p.push(`Health Ins: ${fmt(D.hiSelf)}/yr`);
+    userMsg(p.length?p.join(', '):'No existing investments');
+    await salD();
+  });
+}
+
+async function salD(){
+  await botMsg(`Last section! Monthly kharcha batao approximately:`,500);
+  showForm('Monthly Expenses','fa-receipt',`
+    <div class="form-row"><label>Rent</label><input type="text" name="rent" placeholder="${D.rent||'0'}" value="${D.rent||''}"></div>
+    <div class="form-row"><label>Khana / Groceries</label><input type="text" name="food" placeholder="e.g. 8000"></div>
+    <div class="form-row"><label>Transport (petrol/metro/cab)</label><input type="text" name="trans" placeholder="e.g. 3000"></div>
+    <div class="form-row"><label>Mobile + Internet + OTT (Netflix etc)</label><input type="text" name="mob" placeholder="e.g. 1500"></div>
+    <div class="form-row"><label>EMI (koi bhi loan ki)</label><input type="text" name="emi" placeholder="e.g. 5000 ya 0"></div>
+    <div class="form-row"><label>Shopping / bahar khana / entertainment</label><input type="text" name="misc" placeholder="e.g. 5000"></div>
+    <div class="form-row"><label>Kuch aur bada kharcha? (optional)</label><input type="text" name="extra" placeholder="e.g. 0"></div>
+  `,'Next — Tax Regime',async(v,c)=>{
+    c.remove();D.exp.rent=parse(v.rent)||D.rent;D.exp.food=parse(v.food);D.exp.trans=parse(v.trans);D.exp.mob=parse(v.mob);D.exp.emi=parse(v.emi);D.exp.misc=parse(v.misc)+(parse(v.extra)||0);
+    const tot=Object.values(D.exp).reduce((a,b)=>a+b,0);
+    userMsg(`Total monthly expenses: ${fmt(tot)}`);
+    await salE();
+  });
+}
+
+async function salE(){
+  await botMsg(`Ek last cheez — aap Old Tax Regime pe ho ya New Tax Regime pe?\n\nAgar pata nahi:\n• Old Regime = zyada deductions milti hain (HRA, 80C etc) but slabs thodi zyada hain\n• New Regime = kam deductions but lower tax slabs, aur ₹7L tak zero tax\n\nKya pata hai aapko konsa hai? Ya main dono calculate karke batata hoon konsa better hai.`,500);
+  showRegime(async(reg)=>{D.regime=reg;userMsg(reg==='old'?'Old Tax Regime':reg==='new'?'New Tax Regime':'Dono calculate karo');await genSalReport();});
+}
+
+/* ═══════════════ BUSINESS FLOW ═══════════════ */
+async function bizA(){
+  await botMsg(`Theek hai! Business ke baare mein batao:`,500);
+  showForm('Business Income','fa-briefcase',`
+    <div class="form-row"><label>Monthly average income/revenue kitni hai?</label><input type="text" name="rev" placeholder="e.g. 100000 ya 1 lakh" data-required="true"></div>
+    <div class="form-row"><label>Business kis type ka hai?</label><select name="type"><option value="service">Service Based (consulting/freelancing)</option><option value="product">Product Based</option><option value="freelance">Freelancing</option><option value="professional">Professional (Doctor, CA, Lawyer etc)</option><option value="other">Other</option></select></div>
+    <div class="form-row"><label>GST registration hai?</label><select name="gst"><option value="no">No</option><option value="yes">Yes</option></select></div>
+    <div class="form-row" id="gsRow" style="display:none"><label>GST Slab</label><select name="slab"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
+  `,'Next — Business Expenses',async(v,c)=>{
+    c.remove();D.bizRev=parse(v.rev);D.bizType=v.type;D.bizGST=v.gst==='yes';D.bizSlab=parseInt(v.slab)||0;
+    userMsg(`Revenue: ${fmt(D.bizRev)}/month, ${D.bizType}${D.bizGST?', GST: '+D.bizSlab+'%':''}`);
+    await bizB();
+  });
+  setTimeout(()=>{const g=document.querySelector('select[name="gst"]'),r=document.getElementById('gsRow');if(g&&r)g.addEventListener('change',()=>r.style.display=g.value==='yes'?'block':'none');},100);
+}
+
+async function bizB(){
+  await botMsg(`Business ka monthly kharcha batao:`,500);
+  showForm('Business Expenses','fa-calculator',`
+    <div class="form-row"><label>Office rent (agar hai)</label><input type="text" name="oRent" placeholder="e.g. 15000 ya 0"></div>
+    <div class="form-row"><label>Staff salary (agar hai)</label><input type="text" name="staff" placeholder="e.g. 20000 ya 0"></div>
+    <div class="form-row"><label>Raw material / tools / software</label><input type="text" name="tools" placeholder="e.g. 15000"></div>
+    <div class="form-row"><label>Travel / transport</label><input type="text" name="travel" placeholder="e.g. 5000 ya 0"></div>
+    <div class="form-row"><label>Marketing / advertising</label><input type="text" name="mkt" placeholder="e.g. 5000 ya 0"></div>
+    <div class="form-row"><label>Kuch aur bada business expense?</label><input type="text" name="other" placeholder="e.g. 0"></div>
+    <div class="form-row"><label>Proper bills/invoices maintain karte ho?</label><select name="books"><option value="no">No / Cash mein zyada</option><option value="yes">Yes</option></select></div>
+  `,'Next — Personal Expenses',async(v,c)=>{
+    c.remove();D.bizExp=parse(v.oRent)+parse(v.staff)+parse(v.tools)+parse(v.travel)+parse(v.mkt)+parse(v.other);D.bizBooks=v.books==='yes';
+    userMsg(`Business expenses: ${fmt(D.bizExp)}/month, Books: ${D.bizBooks?'Yes':'No'}`);
+    await bizC();
+  });
+}
+
+async function bizC(){
+  await botMsg(`Ab personal monthly kharcha batao:`,500);
+  showForm('Personal Monthly Expenses','fa-wallet',`
+    <div class="form-row"><label>Rent (personal)</label><input type="text" name="rent" placeholder="e.g. 10000 ya 0"></div>
+    <div class="form-row"><label>Khana / Groceries</label><input type="text" name="food" placeholder="e.g. 8000"></div>
+    <div class="form-row"><label>Transport</label><input type="text" name="trans" placeholder="e.g. 3000"></div>
+    <div class="form-row"><label>EMIs</label><input type="text" name="emi" placeholder="e.g. 5000 ya 0"></div>
+    <div class="form-row"><label>Miscellaneous</label><input type="text" name="misc" placeholder="e.g. 5000"></div>
+  `,'Next — Financial Setup',async(v,c)=>{
+    c.remove();D.bizPE.rent=parse(v.rent);D.bizPE.food=parse(v.food);D.bizPE.trans=parse(v.trans);D.bizPE.emi=parse(v.emi);D.bizPE.misc=parse(v.misc);
+    userMsg(`Personal expenses: ${fmt(Object.values(D.bizPE).reduce((a,b)=>a+b,0))}/month`);
+    await bizD();
+  });
+}
+
+async function bizD(){
+  await botMsg(`Personal finance ke baare mein:`,500);
+  showForm('Financial Setup','fa-shield-halved',`
+    <div class="form-row"><label>Existing investments per year (PPF, MF, FD etc)</label><input type="text" name="inv" placeholder="e.g. 100000 ya 0"></div>
+    <div class="form-row"><label>Health insurance yearly premium?</label><input type="text" name="hi" placeholder="e.g. 15000 ya 0"></div>
+    <div class="form-row"><label>Business loan EMI per month?</label><input type="text" name="loan" placeholder="e.g. 10000 ya 0"></div>
+  `,'Generate My Report',async(v,c)=>{
+    c.remove();D.bizInv=parse(v.inv);D.bizHI=parse(v.hi);D.bizLoan=parse(v.loan);
+    userMsg(`Investments: ${fmt(D.bizInv)}/yr, Health: ${fmt(D.bizHI)}/yr, Loan: ${fmt(D.bizLoan)}/mo`);
+    await genBizReport();
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   SALARIED REPORT GENERATION
+   ═══════════════════════════════════════════════════ */
+async function genSalReport(){
+  await botMsg(`Calculating your complete tax analysis... 🧮`,600);
+  const d=D;
+  const mGross=d.ctc>0?d.ctc:Math.round(d.ih*1.25);
+  const aGross=mGross*12;
+  const mBasic=Math.round(mGross*.40);
+  const aBasic=mBasic*12;
+  const aHRA=d.hra*12;
+  const aRent=d.rent*12;
+  const epfA=d.epf*12;
+  const cur80C=epfA+d.lic+d.o80c+d.hlP;
+  const cur80D=d.hiSelf+(d.parSr?Math.min(d.hiPar,LIM_80D_PAR_S):Math.min(d.hiPar,LIM_80D_PAR));
+  const hraEx=(d.parents&&d.rent===0)?0:calcHRA(aBasic,aHRA,aRent,d.metro);
+
+  // Current regime tax
+  let curD,curTax,curLabel;
+  if(d.regime==='new'){
+    curD={sd:STD_NEW};curTax=calcNew(aGross,curD);curLabel='New';
+  }else{
+    curD={sd:STD_OLD,hra:hraEx,c80:cur80C,d80:cur80D,s24:d.hlI,nps:0};curTax=calcOld(aGross,curD);curLabel='Old';
+  }
+
+  // Optimized OLD
+  const opt80C=Math.min(cur80C,LIM_80C);
+  const rem80C=LIM_80C-opt80C;
+  const opt80D=Math.min(d.hiSelf,LIM_80D_SELF)+(d.parSr?Math.min(d.hiPar,LIM_80D_PAR_S):Math.min(d.hiPar,LIM_80D_PAR));
+  const optOldD={sd:STD_OLD,hra:hraEx,c80:LIM_80C,d80:opt80D,s24:d.hlI,nps:LIM_NPS};
+  const optOld=calcOld(aGross,optOldD);
+
+  // Optimized NEW
+  const optNewD={sd:STD_NEW};
+  const optNew=calcNew(aGross,optNewD);
+
+  const bestTax=Math.min(optOld.t,optNew.t);
+  const bestRegime=optOld.t<optNew.t?'Old':'New';
+  const taxSaving=Math.max(0,curTax.t-bestTax);
+
+  // If "both" — use the better regime as current
+  let effectiveRegime=curLabel;
+  if(d.regime==='both'){effectiveRegime=bestRegime;}
+
+  // Expenses
+  const totExp=Object.values(d.exp).reduce((a,b)=>a+b,0);
+  const surplus=d.ih-totExp;
+  const savRate=d.ih>0?Math.round(surplus/d.ih*100):0;
+  const idealSav=Math.round(d.ih*.20);
+  const emergFund=totExp*6;
+  const ic=incomeClass(aGross);
+
+  let h='';
+
+  // Profile
+  h+=`<div class="report-section"><div class="report-section-title">👤 AAPKA PROFILE</div>
+  <div class="report-line">Salaried employee, ${d.metro?'Metro':'Non-Metro'} city. In-hand ${fmt(d.ih)}/month${d.ctc?' (CTC '+fmt(d.ctc)+'/month)':''}. ${d.parents?'Parents ke saath rehte ho.':d.rent>0?'Rent '+fmt(d.rent)+'/month dete ho.':'No rent.'}</div></div>`;
+
+  // Tax
+  h+=`<div class="report-section"><div class="report-section-title">💸 ABHI KITNA TAX DE RAHE HO</div>
+  <div class="report-line">Annual Gross Income: <strong>${fmt(aGross)}</strong></div>`;
+  if(d.regime!=='new'){h+=`<div class="report-line">Total Deductions: <strong>${fmt(aGross-curTax.ti)}</strong></div>`;}
+  h+=`<div class="report-line">Taxable Income: <strong>${fmt(curTax.ti)}</strong></div>
+  <div class="report-line">Tax Payable: <strong>${fmt(curTax.t)} per year (${fmt(Math.round(curTax.t/12))} per month)</strong></div>
+  <div class="report-line">Regime: <strong>${curLabel}</strong></div></div>`;
+
+  // Income level message
+  h+=`<div class="report-section">`;
+  if(ic==='vl'||ic==='lo'){
+    h+=`<div class="report-ok"><strong>✅ GOOD NEWS — ZERO TAX ZONE</strong><br>Aapki income ${fmt(aGross)} hai jo ${ic==='vl'?'₹5L':'₹7L (New Regime mein)'} se kam hai isliye aapko koi tax nahi dena. Yeh legal hai aur sahi hai. Ab focus karo wealth building pe — tax saving baad mein aayega jab salary badhegi.</div>`;
+  }else if(ic==='lm'||ic==='mid'){
+    h+=`<div class="report-warn"><strong>⚠️ TAX BACHANE KA MAUKA HAI</strong><br>Aap abhi ${fmt(curTax.t)} tax de rahe ho. Neeche dekho kitna bacha sakte ho.</div>`;
+  }else{
+    h+=`<div class="report-miss"><strong>🚨 TAX PLANNING ZARURI HAI</strong><br>Aap abhi ${fmt(curTax.t)} tax de rahe ho per year. Yeh ${fmt(Math.round(curTax.t/12))} per month hai. Sahi planning se isko significantly kam kar sakte ho.</div>`;
+  }
+  h+=`</div>`;
+
+  // Tax Saving Opportunities
+  h+=`<div class="report-section"><div class="report-section-title">✅ TAX SAVING OPPORTUNITIES (JO MISS KAR RAHE HO)</div>`;
+
+  // Standard Deduction
+  const sdUsed=d.regime==='new'?STD_NEW:STD_OLD;
+  h+=`<div class="report-line" style="margin-bottom:8px;">📌 <strong>Standard Deduction</strong> — ${d.regime==='new'?'₹75,000':'₹50,000'}<br>Already apply hoti hai automatically. Aapko: ${fmt(sdUsed)} mil raha hai ✅</div>`;
+
+  // 80C
+  const pct80C=Math.min(100,Math.round(opt80C/LIM_80C*100));
+  h+=`<div class="report-line" style="margin-bottom:4px;">📌 <strong>Section 80C — Used: ${fmt(opt80C)} / Limit: ${fmt(LIM_80C)}</strong></div>
+  <div class="skeu-bar"><div class="skeu-bar-fill" style="width:${pct80C}%"></div></div>
+  <div class="skeu-bar-label">${pct80C}% used — Bacha hua: ${fmt(rem80C)}</div>`;
+  if(rem80C>0){
+    const ts80C=Math.round(rem80C*.3*1.04);
+    if(d.regime==='new'){
+      h+=`<div class="report-miss"><strong>Yeh ${fmt(rem80C)} New Regime mein claim nahi hoga!</strong> Old Regime switch karo toh ${fmt(ts80C)}/year tax bachega. ELSS ya PPF mein daal sakte ho.</div>`;
+    }else{
+      h+=`<div class="report-miss">Yeh ${fmt(rem80C)} mein invest karo:<br>→ <strong>PPF:</strong> Safe, government backed, 7.1% return, 15 saal lock-in<br>→ <strong>ELSS Mutual Fund:</strong> Market linked, 3 saal lock-in, potentially higher returns<br>→ <strong>Increase voluntary EPF</strong><br>Tax bachega: <strong>${fmt(ts80C)} per year</strong></div>`;
+    }
+  }else{
+    h+=`<div class="report-ok">80C poora utilize hai! Kamal ka kaam! ✅</div>`;
+  }
+
+  // 80D
+  h+=`<div class="report-line" style="margin:10px 0 4px;">📌 <strong>Section 80D — Health Insurance</strong></div>`;
+  if(d.hiSelf===0){
+    if(d.regime==='new'){
+      h+=`<div class="report-miss"><strong>Health insurance nahi hai — yeh RISK hai aur tax loss bhi!</strong> New Regime mein 80D nahi milta par health insurance bina karna bahut risky hai. Rough premium: ₹8,000–₹15,000/year for ₹5L cover.</div>`;
+    }else{
+      const ts80d=Math.round(LIM_80D_SELF*.3*1.04);
+      h+=`<div class="report-miss"><strong>Aapke paas health insurance nahi hai. Yeh RISK hai aur tax loss bhi.</strong><br>Self + Family cover lo: ${fmt(LIM_80D_SELF)} tak premium pe <strong>${fmt(ts80d)} tax bachega</strong>. Rough premium: ₹8,000–₹15,000/year for ₹5L cover.</div>`;
+    }
+  }else{
+    h+=`<div class="report-ok">Self/Family: ${fmt(Math.min(d.hiSelf,LIM_80D_SELF))} claimed ✅</div>`;
+  }
+  if(d.hiPar===0&&d.regime==='old'){
+    h+=`<div class="report-miss">Parents health insurance missing — additional ${d.parSr?fmt(LIM_80D_PAR_S):fmt(LIM_80D_PAR)} deduction miss ho raha hai.</div>`;
+  }else if(d.hiPar>0&&d.regime==='old'){
+    h+=`<div class="report-ok">Parents: ${fmt(d.parSr?Math.min(d.hiPar,LIM_80D_PAR_S):Math.min(d.hiPar,LIM_80D_PAR))} claimed ✅</div>`;
+  }
+
+  // HRA
+  h+=`<div class="report-line" style="margin:10px 0 4px;">📌 <strong>HRA Exemption</strong></div>`;
+  if(hraEx>0){
+    h+=`<div class="report-line">HRA received: ${fmt(aHRA)}/year → Exempt: <strong>${fmt(hraEx)}/year</strong> → Taxable HRA: ${fmt(aHRA-hraEx)}/year</div>`;
+    if(d.regime==='new')h+=`<div class="report-miss">Yeh ${fmt(hraEx)} exemption New Regime mein <strong>miss ho raha hai</strong>! Old Regime switch karo.</div>`;
+    else h+=`<div class="report-ok">Correctly claimed ✅</div>`;
+  }else if(d.hra>0&&hraEx===0){
+    h+=`<div class="report-warn">HRA mil raha hai (${fmt(aHRA)}/yr) par exemption zero hai. ${d.parents&&d.rent===0?'Parents ke saath rehte ho aur rent nahi dete — isliye no HRA exemption. Agar parents ko rent do (bank transfer) toh exemption mil sakti hai.':'Rent 10% basic se kam ya HRA se kam hai.'}</div>`;
+  }else{
+    h+=`<div class="report-line" style="color:var(--text-dim);">HRA nahi milta — not applicable.</div>`;
+  }
+
+  // NPS
+  if(ic!=='vl'&&ic!=='lo'){
+    const tsNPS=Math.round(LIM_NPS*.3*1.04);
+    h+=`<div class="report-line" style="margin:10px 0 4px;">📌 <strong>Section 80CCD(1B) — NPS Extra Deduction</strong></div>`;
+    h+=`<div class="report-miss">80C ke upar EXTRA ${fmt(LIM_NPS)} deduction milti hai NPS mein invest karne pe. Tax saving: <strong>${fmt(tsNPS)}/year</strong>. ${d.regime==='new'?'New Regime mein yeh bhi nahi milta — Old Regime consider karo.':'Old Regime mein available hai.'}</div>`;
+  }
+
+  // 24B
+  if(d.hlI>0){
+    const cl24=Math.min(d.hlI,LIM_24B);
+    h+=`<div class="report-line" style="margin:10px 0 4px;">📌 <strong>Section 24B — Home Loan Interest</strong></div>`;
+    h+=`<div class="report-line">Aap ${fmt(d.hlI)} interest de rahe ho → Deduction: <strong>${fmt(cl24)}</strong> (max ${fmt(LIM_24B)})</div>`;
+    if(d.regime==='new')h+=`<div class="report-miss">New Regime mein yeh deduction nahi milta!</div>`;
+    else h+=`<div class="report-ok">Claimed ✅</div>`;
+  }
+
+  // Old vs New comparison
+  h+=`<div class="report-line" style="margin:14px 0 6px;font-weight:600;color:var(--text);">📌 OLD vs NEW REGIME COMPARISON</div>
+  <table class="skeu-table">
+  <tr><th></th><th>OLD REGIME</th><th>NEW REGIME</th></tr>
+  <tr><td>Gross Income</td><td>${fmt(aGross)}</td><td>${fmt(aGross)}</td></tr>
+  <tr><td>Total Deductions</td><td>${fmt(aGross-optOld.ti)}</td><td>${fmt(STD_NEW)}</td></tr>
+  <tr><td>Taxable Income</td><td>${fmt(optOld.ti)}</td><td>${fmt(optNew.ti)}</td></tr>
+  <tr class="hl"><td>Tax</td><td>${fmt(optOld.t)}</td><td>${fmt(optNew.t)}</td></tr>
+  </table>
+  <div class="report-line" style="margin-top:6px;">👉 <strong style="color:${bestRegime==='Old'?'var(--warn)':'var(--good)'}">${bestRegime} Regime mein ${fmt(Math.abs(optOld.t-optNew.t))} zyada bachenge.</strong> ${d.regime!==bestRegime.toLowerCase()&&d.regime!=='both'?'SWITCH KARO!':'Aap sahi choice pe ho.'}</div>`;
+
+  h+=`</div>`; // close opportunities section
+
+  // Total Saving
+  h+=`<div class="report-section"><div class="report-section-title">💰 TOTAL TAX BACHANE KA SCOPE</div>
+  <div class="report-line">Abhi tax de rahe ho: <strong>${fmt(curTax.t)} per year</strong></div>
+  <div class="report-line">Optimized tax: <strong>${fmt(bestTax)} per year</strong></div>
+  <span class="report-save-num">TOTAL SAVING: ${fmt(taxSaving)} per year (${fmt(Math.round(taxSaving/12))} per month)</span>
+  ${taxSaving===0?'<div class="report-ok">Aapki income itni hai ki tax waise bhi zero/minimal hai. Worry mat karo. Focus karo investments pe. ✅</div>':''}
+  </div>`;
+
+  // Spending Analysis
+  const needsPct=d.ih>0?Math.round((d.exp.rent+d.exp.food+d.exp.trans)/d.ih*100):0;
+  const wantsPct=d.ih>0?Math.round((d.exp.mob+d.exp.misc)/d.ih*100):0;
+  const savPct2=savRate;
+  h+=`<div class="report-section"><div class="report-section-title">📉 SPENDING ANALYSIS</div>
+  <div class="report-line">Monthly Income (in-hand): <strong>${fmt(d.ih)}</strong></div>
+  <div class="spend-tree">
+  ├─ Rent: ${fmt(d.exp.rent)}<br>
+  ├─ Khana/Groceries: ${fmt(d.exp.food)}<br>
+  ├─ Transport: ${fmt(d.exp.trans)}<br>
+  ├─ Mobile/Internet/OTT: ${fmt(d.exp.mob)}<br>
+  ├─ EMIs: ${fmt(d.exp.emi)}<br>
+  ├─ Entertainment/Shopping: ${fmt(d.exp.misc)}<br>
+  <div class="st-total">└─ Total: ${fmt(totExp)}</div>
+  </div>
+  <div class="report-line">Monthly Surplus: <strong>${fmt(surplus)}</strong></div>
+  <div class="report-line">Savings Rate: <strong>${savingsEmoji(savRate)} ${savRate}%</strong></div>`;
+
+  if(savRate<10)h+=`<div class="report-miss"><strong>🔴 DANGER ZONE — Kharcha bahut zyada hai.</strong> Turant kuch cuts karo.</div>`;
+  else if(savRate<20)h+=`<div class="report-warn"><strong>🟡 AVERAGE — Thoda better kar sakte ho.</strong></div>`;
+  else if(savRate<35)h+=`<div class="report-ok"><strong>🟢 GOOD — Sahi track pe ho.</strong></div>`;
+  else h+=`<div class="report-ok"><strong>🌟 EXCELLENT — Bahut achha!</strong> Invest karo isko smartly.</div>`;
+
+  // Flag high spending
+  if(d.exp.mob>500)h+=`<div class="report-line" style="color:var(--warn);margin-top:4px;">OTT aur subscriptions pe ${fmt(d.exp.mob)} ja raha hai. Check karo kaun se actually use karte ho.</div>`;
+  if(d.exp.misc>3000)h+=`<div class="report-line" style="color:var(--warn);">Shopping/entertainment pe ${fmt(d.exp.misc)} — thoda control mein rakhna.</div>`;
+  if(d.exp.emi>d.ih*0.4)h+=`<div class="report-miss"><strong>⚠️ EMI burden bahut zyada hai</strong> — income ka ${Math.round(d.exp.emi/d.ih*100)}% ja raha hai EMIs mein. Koi naya loan mat lo abhi.</div>`;
+
+  h+=`<div class="report-line" style="margin-top:8px;color:var(--text-dim);font-size:0.8rem;"><strong>50/30/20 Rule Check:</strong><br>Ideal: 50% needs + 30% wants + 20% savings<br>Aapka: ${needsPct}% needs + ${wantsPct}% wants + ${savPct2}% savings</div>`;
+  h+=`</div>`;
+
+  // Investment Plan
+  const investable=Math.max(0,surplus);
+  const sipAmt=Math.max(1000,Math.round(investable*.50/500)*500);
+  const sipFV=sipFuture(sipAmt,15,12);
+  const ppfSug=Math.min(rem80C>0?rem80C:0,Math.round(investable*.30/500)*500*12);
+
+  h+=`<div class="report-section"><div class="report-section-title">📈 INVESTMENT PLAN</div>
+  <div class="report-disclaimer">⚠️ DISCLAIMER: Yeh suggestions sirf educational purpose ke liye hain. Invest karne se pehle apna research karo. SEBI registered financial advisor se baat karo complex decisions ke liye. Past returns future returns ki guarantee nahi hain.</div>
+  <div class="report-line">Monthly surplus: <strong>${fmt(investable)}</strong><br>Invest karne layak: <strong>${fmt(Math.round(investable*.80))}</strong> (surplus ka 80%, baaki emergency rakho)</div>`;
+
+  h+=`<div class="report-action"><div class="report-action-num">1</div><div class="report-action-text"><strong>Emergency Fund — ${fmt(emergFund)}</strong><br>Yeh PEHLE banao. FD ya Liquid Mutual Fund mein rakho. 6 months × monthly expenses. Timeline: ${investable>0?Math.ceil(emergFund/(investable*.80)):''} months mein build ho jayega. FD mein ~7%, Liquid Fund mein ~6.5-7%.</div></div>`;
+
+  h+=`<div class="report-action"><div class="report-action-num">2</div><div class="report-action-text"><strong>Term Insurance</strong><br>Agar aap nahi rahe toh family ka kya hoga? Cover: Annual income × 10-15. Rough premium: ₹800-1,500/year for ₹1Cr cover (age se depends). Jitna jaldi lo utna sasta — age badhne pe premium badhta hai.</div></div>`;
+
+  h+=`<div class="report-action"><div class="report-action-num">3</div><div class="report-action-text"><strong>Health Insurance — ₹5L cover minimum</strong><br>Rough cost: ₹8,000–₹20,000/year. Iske bina ek hospital bill sab savings khatam kar sakta hai.</div></div>`;
+
+  if(sipAmt>=1000){
+    h+=`<div class="report-action"><div class="report-action-num">4</div><div class="report-action-text"><strong>SIP in Nifty 50 Index Fund — ${fmt(sipAmt)}/month</strong><br>India ki top 50 companies mein automatically invest. Risk: Medium. Long term (10-15+ saal): Historically ~12% CAGR average.<br><strong style="color:var(--c4);">${fmt(sipAmt)}/month × 15 saal = approximately ${fmt(sipFV)}</strong></div></div>`;
+  }
+
+  if(ppfSug>0){
+    h+=`<div class="report-action"><div class="report-action-num">5</div><div class="report-action-text"><strong>PPF — ${fmt(ppfSug)}/year</strong><br>80C mein gap hai. Return: 7.1% guaranteed, tax free maturity. Lock-in: 15 saal (partial withdrawal 7th year se).</div></div>`;
+  }
+
+  h+=`<div class="report-action"><div class="report-action-num">6</div><div class="report-action-text"><strong>Step Up Plan</strong><br>Jab bhi salary badhay: SIP mein 10-20% increase karo. Example: Abhi ${fmt(sipAmt)} SIP → next raise pe ${fmt(Math.round(sipAmt*1.15))} → uske baad ${fmt(Math.round(sipAmt*1.32))}. Yeh habit sab se badi wealth builder hai.</div></div>`;
+
+  h+=`</div>`;
+
+  // 3 Action Items
+  h+=`<div class="report-section"><div class="report-section-title">🎯 AAPKE 3 ACTION ITEMS — AGLE 30 DIN MEIN</div>`;
+  let acts=[];
+  if(d.regime!=='both'&&d.regime!==bestRegime.toLowerCase()&&taxSaving>0){
+    acts.push(`<strong>Tax regime switch karo ${bestRegime} Regime pe:</strong> ${fmt(Math.abs(curTax.t-bestTax))}/year direct saving. HR se baat karo ya income tax portal pe change karo.`);
+  }
+  if(rem80C>0&&d.regime!=='new'){
+    acts.push(`<strong>80C mein ${fmt(rem80C)} bacha hai:</strong> PPF account open karo Post Office ya SBI mein — online bhi hota hai — aur ${fmt(Math.min(rem80C,Math.round(investable*.80)))} daalo is month. Deadline: 31st March.`);
+  }
+  if(d.hiSelf===0){
+    acts.push(`<strong>Health insurance lo:</strong> PolicyBazaar ya ACKO pe check karo — ₹5L cover ke liye ₹8,000–₹12,000/year hoga. Kal compare karo, kal hi le lo.`);
+  }
+  if(acts.length<3&&investable>0){
+    acts.push(`<strong>SIP start karo ${fmt(sipAmt)}/month:</strong> Zerodha ya Groww pe Nifty 50 Index Fund ka SIP set karo. Time in market > timing the market.`);
+  }
+  if(acts.length<3){
+    acts.push(`<strong>Emergency fund shuru karo:</strong> ${fmt(emergFund)} target hai. FD open karo aur ${fmt(Math.min(Math.round(investable*.80),emergFund))} transfer karo pehle month mein.`);
+  }
+  acts.slice(0,3).forEach((a,i)=>{
+    h+=`<div class="report-action"><div class="report-action-num">${i+1}</div><div class="report-action-text">${a}</div></div>`;
+  });
+  h+=`</div>`;
+
+  // Render
+  const rd=document.createElement('div');rd.className='report-card';
+  rd.innerHTML=`<div class="report-header"><h2><i class="fa-solid fa-chart-line" style="margin-right:6px;"></i> TAXMATE INDIA — AAPKI FINANCE REPORT</h2><p>FY 2024-25 | ${effectiveRegime} Regime</p></div><div class="report-body">${h}</div><div style="padding:0 22px 20px;"><button class="report-copy-btn" onclick="copyR(this)"><i class="fa-regular fa-copy" style="margin-right:6px;"></i>Copy Report as Text</button></div>`;
+  CA.appendChild(rd);scroll();
+  rd.dataset.rt=buildSalText(d,aGross,curTax,curLabel,bestTax,taxSaving,totExp,surplus,savRate,emergFund,sipAmt,sipFV,bestRegime,optOld,optNew,hraEx,rem80C,cur80C);
+
+  await botMsg(`Koi sawaal hai? Kuch samajh nahi aaya ya aur detail chahiye kisi bhi point pe? Poochho! 💬`,400);
+}
+
+function buildSalText(d,ag,ct,cl,bt,ts,te,su,sr,ef,sa,sfv,br,oo,on,he,r8,c8){
+  let t='═══ TAXMATE INDIA — FINANCE REPORT ═══\nFY 2024-25\n\n';
+  t+=`Gross: ${fmt(ag)} | Tax: ${fmt(ct.t)}/yr (${cl})\n`;
+  t+=`Saving possible: ${fmt(ts)}/yr\n`;
+  t+=`Better regime: ${br}\nOld(opt): ${fmt(oo.t)} | New: ${fmt(on.t)}\n\n`;
+  t+=`Expenses: ${fmt(te)}/mo | Surplus: ${fmt(su)} (${sr}%)\n\n`;
+  t+=`Actions:\n1. Emergency fund: ${fmt(ef)}\n2. SIP: ${fmt(sa)}/mo → ${fmt(sfv)} in 15yr\n3. Check 80C + regime\n`;
+  return t;
+}
+
+/* ═══════════════════════════════════════════════════
+   BUSINESS REPORT GENERATION
+   ═══════════════════════════════════════════════════ */
+async function genBizReport(){
+  await botMsg(`Calculating your business tax analysis... 🧮`,600);
+  const d=D;
+  const aRev=d.bizRev*12;
+  const aExp=d.bizExp*12;
+  const aPers=Object.values(d.bizPE).reduce((a,b)=>a+b,0)*12;
+  const aLoan=d.bizLoan*12;
+  const isPro=d.bizType==='professional';
+  const pLimit=isPro?75e5:30e5;
+  const canPres=aRev<=pLimit;
+  const pRate=isPro?.50:.08;
+  const pProfit=Math.round(aRev*pRate);
+  const aProfit=Math.max(0,aRev-aExp);
+  const deemedBetter=pProfit<aProfit;
+  const ti=canPres&&deemedBetter?pProfit:aProfit;
+  const taxN=calcNew(ti,{sd:0});
+  const taxO=calcOld(ti,{sd:0,c80:Math.min(d.bizInv,LIM_80C),d80:d.bizHI});
+  const net=d.bizRev-d.bizExp-Object.values(d.bizPE).reduce((a,b)=>a+b,0)-d.bizLoan;
+  const sr=d.bizRev>0?Math.round(net/d.bizRev*100):0;
+  const totE=d.bizExp+Object.values(d.bizPE).reduce((a,b)=>a+b,0)+d.bizLoan;
+  const ef=totE*6;
+  const taxSave=Math.max(0,taxN.t-Math.min(taxN.t,taxO.t));
+
+  let h='';
+  h+=`<div class="report-section"><div class="report-section-title">👤 AAPKA PROFILE</div>
+  <div class="report-line">${d.bizType.charAt(0).toUpperCase()+d.bizType.slice(1)} business, monthly revenue ${fmt(d.bizRev)}, expenses ${fmt(d.bizExp)}. ${d.bizGST?'GST registered at '+d.bizSlab+'%.':'Not GST registered.'} ${d.bizBooks?'Maintains books.':'No proper books.'}</div></div>`;
+
+  h+=`<div class="report-section"><div class="report-section-title">💸 TAX ESTIMATE</div>
+  <div class="report-line">Annual Revenue: <strong>${fmt(aRev)}</strong></div>
+  <div class="report-line">Annual Business Expenses: <strong>${fmt(aExp)}</strong></div>`;
+  if(canPres){
+    h+=`<div class="report-ok"><strong>Presumptive Taxation (${isPro?'44ADA':'44AD'}): Available!</strong> Deemed profit: ${fmt(pProfit)} (${Math.round(pRate*100)}% of revenue). Actual profit: ${fmt(aProfit)} — ${deemedBetter?'Presumptive better':'Actual better'}.</div>`;
+  }else{
+    h+=`<div class="report-warn">Presumptive taxation: <strong>Not eligible</strong> (revenue exceeds ${fmt(pLimit)} for ${isPro?'44ADA':'44AD'}). Actual profit: ${fmt(aProfit)}.</div>`;
+  }
+  h+=`<div class="report-line">Taxable income: <strong>${fmt(ti)}</strong></div>
+  <div class="report-line">New Regime tax: <strong>${fmt(taxN.t)}/year (${fmt(Math.round(taxN.t/12))}/month)</strong></div>`;
+  if(d.bizInv>0||d.bizHI>0)h+=`<div class="report-line">Old Regime tax (with 80C+80D): <strong>${fmt(taxO.t)}/year</strong></div>`;
+  h+=`</div>`;
+
+  h+=`<div class="report-section"><div class="report-section-title">💰 POTENTIAL TAX SAVING</div>`;
+  if(d.bizInv>0||d.bizHI>0){
+    h+=`<span class="report-save-num">Old Regime use karke ${fmt(taxSave)}/year bacha sakte ho (80C + 80D deductions ke through).</span>`;
+  }else{
+    h+=`<div class="report-line">Abhi koi tax-saving investments nahi hain. 80C (PPF, ELSS) aur 80D (health insurance) start karo toh Old Regime mein tax save hoga.</div>`;
+  }
+  h+=`</div>`;
+
+  h+=`<div class="report-section"><div class="report-section-title">📉 SPENDING ANALYSIS</div>
+  <div class="report-line">Monthly revenue: <strong>${fmt(d.bizRev)}</strong> | Total outflow: <strong>${fmt(totE)}</strong></div>
+  <div class="report-line">Net monthly: <strong>${fmt(net)}</strong> (${sr}%)</div>
+  ${sr<20?'<div class="report-miss">Savings rate bahut low hai — 20%+ target karo.</div>':sr<35?'<div class="report-warn">Decent hai, improve kar sakte ho.</div>':'<div class="report-ok">Savings rate achhi hai! Invest karo.</div>'}
+  </div>`;
+
+  // GST
+  h+=`<div class="report-section"><div class="report-section-title">🧾 GST SECTION</div>`;
+  if(d.bizGST){
+    h+=`<div class="report-line">GST Status: Registered at ${d.bizSlab}%</div>
+    <div class="report-miss"><strong>Input Tax Credit (ITC) — yeh log miss karte hain:</strong> Aap jo GST bharte ho purchases pe — woh wapas milti hai ITC ke roop mein. Example: ₹10,000 ka software jisme ₹1,800 GST → yeh ₹1,800 wapas milega output GST se. Software, office equipment, business travel, raw material — sab pe ITC lo.</div>
+    <div class="report-warn"><strong>Common GST Mistakes:</strong><br>1. Personal expenses mein GST ITC claim karna — illegal hai<br>2. GSTR-1 aur GSTR-3B mein mismatch — notice aata hai<br>3. Time pe file nahi karna — ₹50/day penalty<br>4. Input service distributor rules ignore karna</div>`;
+    if(aRev<=15e5)h+=`<div class="report-line" style="margin-top:6px;"><strong>Composition Scheme:</strong> Aapka turnover ${fmt(aRev)}/year hai — ₹1.5Cr se kam. Composition scheme pe switch karo — flat 1-6% tax, quarterly filing, much less compliance. But ITC claim nahi kar paoge. Compare karo.</div>`;
+  }else{
+    if(aRev>20e5)h+=`<div class="report-miss"><strong>GST registration likely mandatory:</strong> Aapki revenue ${fmt(aRev)} hai — ₹20L (services) se zyada. Register karo warna penalty.</div>`;
+    else h+=`<div class="report-line">Revenue threshold se neeche hai. Voluntary registration bhi kar sakte ho — ITC claim ke liye.</div>`;
+  }
+  h+=`</div>`;
+
+  // Investment Plan
+  const sipA=Math.max(1000,Math.round(Math.max(0,net)*.40/500)*500);
+  const sipF=sipFuture(sipA,15,12);
+  h+=`<div class="report-section"><div class="report-section-title">📈 INVESTMENT PLAN</div>
+  <div class="report-disclaimer">⚠️ DISCLAIMER: Yeh suggestions sirf educational purpose ke liye hain. Invest karne se pehle apna research karo. SEBI registered financial advisor se baat karo.</div>
+  <div class="report-action"><div class="report-action-num">1</div><div class="report-action-text"><strong>Emergency Fund — ${fmt(ef)}</strong><br>Business income variable hoti hai. 6 months expenses liquid fund ya FD mein rakho.</div></div>
+  <div class="report-action"><div class="report-action-num">2</div><div class="report-action-text"><strong>Term Insurance — ~₹1,000-2,000/month</strong><br>Business owners ke liye aur bhi zaroori hai. Family ko protect karo.</div></div>`;
+  if(sipA>=1000)h+=`<div class="report-action"><div class="report-action-num">3</div><div class="report-action-text"><strong>SIP in Nifty 50 Index Fund — ${fmt(sipA)}/month</strong><br>${fmt(sipA)}/month × 15 saal = approximately <strong style="color:var(--c4);">${fmt(sipF)}</strong></div></div>`;
+  if(d.bizInv<LIM_80C)h+=`<div class="report-action"><div class="report-action-num">4</div><div class="report-action-text"><strong>80C — ${fmt(LIM_80C-d.bizInv)} remaining</strong><br>PPF ya ELSS mein daal ke Old Regime mein tax save karo.</div></div>`;
+  h+=`</div>`;
+
+  // 3 Actions
+  h+=`<div class="report-section"><div class="report-section-title">🎯 AAPKE 3 ACTION ITEMS — AGLE 30 DIN MEIN</div>`;
+  let acts=[];
+  if(!d.bizGST&&aRev>20e5)acts.push(`<strong>GST registration karo:</strong> Revenue mandatory limit cross kar rahi hai. Jaldi register karo GST portal pe.`);
+  if(d.bizHI===0)acts.push(`<strong>Health insurance le lo:</strong> Business mein no employer cover — khud ka arrangement karo. 80D bhi milega.`);
+  acts.push(`<strong>Emergency fund banao:</strong> ${fmt(ef)} liquid mein rakho pehle. Business mein income unpredictable hoti hai.`);
+  if(acts.length<3)acts.push(`<strong>Books of accounts maintain karo:</strong> Even if presumive taxation use kar rahe ho, proper tracking se decisions better milte hain.`);
+  acts.slice(0,3).forEach((a,i)=>{h+=`<div class="report-action"><div class="report-action-num">${i+1}</div><div class="report-action-text">${a}</div></div>`;});
+  h+=`</div>`;
+
+  const rd=document.createElement('div');rd.className='report-card';
+  rd.innerHTML=`<div class="report-header"><h2><i class="fa-solid fa-chart-line" style="margin-right:6px;"></i> TAXMATE INDIA — BUSINESS FINANCE REPORT</h2><p>FY 2024-25</p></div><div class="report-body">${h}</div><div style="padding:0 22px 20px;"><button class="report-copy-btn" onclick="copyR(this)"><i class="fa-regular fa-copy" style="margin-right:6px;"></i>Copy Report as Text</button></div>`;
+  CA.appendChild(rd);scroll();
+  rd.dataset.rt=`═══ TAXMATE INDIA — BUSINESS REPORT ═══\nFY 2024-25\nRevenue: ${fmt(aRev)}/yr\nTaxable: ${fmt(ti)}\nTax(New): ${fmt(taxN.t)}/yr\nPresumptive: ${canPres?'Yes':'No'}\n\nActions: Emergency fund, health insurance, GST check.`;
+  await botMsg(`Koi sawaal hai? Kuch samajh nahi aaya ya aur detail chahiye kisi bhi point pe? Poochho! 💬`,400);
+}
+
+/* ═══════════════ COPY ═══════════════ */
+function copyR(btn){
+  const t=btn.closest('.report-card').dataset.rt||'';
+  navigator.clipboard.writeText(t).then(()=>{btn.innerHTML='<i class="fa-solid fa-check" style="margin-right:6px;color:var(--good);"></i>Copied!';setTimeout(()=>btn.innerHTML='<i class="fa-regular fa-copy" style="margin-right:6px;"></i>Copy Report as Text',2000);}).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);btn.innerHTML='<i class="fa-solid fa-check" style="margin-right:6px;color:var(--good);"></i>Copied!';setTimeout(()=>btn.innerHTML='<i class="fa-regular fa-copy" style="margin-right:6px;"></i>Copy Report as Text',2000);});
+}
+
+/* ═══════════════ RESTART ═══════════════ */
+function restartApp(){IA.style.display='flex';startApp();}
+
+/* ═══════════════ INIT ═══════════════ */
+setEn(false);startApp();
+</script>
+</body>
+</html>
